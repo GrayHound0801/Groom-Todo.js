@@ -19,6 +19,8 @@ let createNewTodo = () => {
 
   inputEl.removeAttribute("disabled");
   inputEl.focus();
+
+  saveToLocalStorage();
 };
 
 $createBtn.addEventListener("click", createNewTodo);
@@ -27,13 +29,13 @@ const createNewTodoElement = (oneItem) => {
   const itemEl = document.createElement("div");
   itemEl.classList.add("item"); // div class="item"
 
-  const checkbox = document.createElement("input");
-  checkbox.type = "checkbox";
-  checkbox.checked = oneItem.complete;
-  checkbox.classList.add("checkbox");
+  const checkboxEl = document.createElement("input");
+  checkboxEl.type = "checkbox";
+  checkboxEl.checked = oneItem.complete;
+  checkboxEl.classList.add("checkbox");
 
   if (oneItem.complete) {
-    itemEl.checkbox.classList.add("complete");
+    itemEl.classList.add("complete");
   }
 
   const inputEl = document.createElement("input");
@@ -53,7 +55,38 @@ const createNewTodoElement = (oneItem) => {
   removeBtnEl.classList.add("remove-btn");
   removeBtnEl.textContent = "삭제";
 
-  itemEl.append(checkbox);
+  checkboxEl.addEventListener("change", () => {
+    oneItem.complete = checkboxEl.checked;
+
+    if (oneItem.complete) {
+      itemEl.classList.add("complete");
+    } else {
+      itemEl.classList.remove("complete");
+    }
+    saveToLocalStorage();
+  });
+
+  inputEl.addEventListener("input", () => {
+    oneItem.text = inputEl.value;
+  });
+
+  inputEl.addEventListener("blur", () => {
+    inputEl.setAttribute("disabled", "");
+    saveToLocalStorage();
+  });
+
+  editBtnEl.addEventListener("click", () => {
+    inputEl.removeAttribute("disabled");
+    inputEl.focus();
+  });
+
+  removeBtnEl.addEventListener("click", () => {
+    todos = todos.filter((todo) => todo.id !== oneItem.id);
+    itemEl.remove();
+    saveToLocalStorage();
+  });
+
+  itemEl.append(checkboxEl);
   itemEl.append(inputEl);
   itemEl.append(actionsEl);
 
@@ -62,3 +95,29 @@ const createNewTodoElement = (oneItem) => {
 
   return { itemEl, inputEl, editBtnEl, removeBtnEl };
 };
+
+const saveToLocalStorage = () => {
+  const data = JSON.stringify(todos);
+
+  localStorage.setItem("my-todos", data);
+};
+
+const loadFromLocalStorage = () => {
+  const data = localStorage.getItem("my-todos");
+
+  if (data) {
+    todos = JSON.parse(data);
+  }
+};
+
+function displayTodos() {
+  loadFromLocalStorage();
+
+  for (let i = 0; i < todos.length; i++) {
+    const item = todos[i];
+    const { itemEl } = createNewTodoElement(item);
+    $list.append(itemEl);
+  }
+}
+
+displayTodos();

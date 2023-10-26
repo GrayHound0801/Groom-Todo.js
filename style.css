@@ -46,6 +46,11 @@ header {
   margin-bottom: 24px;
 }
 
+.item.complete {
+  text-decoration: line-through;
+  color: #111111;
+}
+
 .checkbox {
   margin-left: 10px;
   zoom: 2;
